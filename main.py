@@ -11,6 +11,8 @@ from keyboards import start_keyboard
 from keyboards import combo_keyboard
 
 
+# await bot.send_chat_action(message.chat.id, 'Загрузка видео')
+
 # Удаление меню команд (если имеется)
 async def clear_commands(robot: Bot) -> None:
     current_commands = await robot.get_my_commands()
@@ -32,12 +34,11 @@ async def bot_start(message: Message):
     await clear_commands(bot)
     await message.delete()
     await message.answer('Привет! Добро пожаловать в календарь', reply_markup=start_keyboard)
-    await message.answer('Календарь v1.0', reply_markup=await combo_keyboard(year_dict))
+    await message.answer('Календарь v1.0', reply_markup=combo_keyboard)
 
 
 # Переключение лет
-@dp.callback_query(F.data == 'prev_year')
-@dp.callback_query(F.data == 'next_year')
+@dp.callback_query(F.data.endwith('year'))
 async def change_year(callback: CallbackQuery):
     old_year = year_dict['Y_none']
 
@@ -52,14 +53,13 @@ async def change_year(callback: CallbackQuery):
             year_dict['Y_none'] = str(next_year)
 
     if year_dict['Y_none'] != old_year:
-        await callback.message.edit_text('Календарь v1.0', reply_markup=await combo_keyboard(year_dict))
+        await callback.message.edit_text('Календарь v1.0', reply_markup=combo_keyboard)
 
     await callback.answer()
 
 
 # Переключение месяцев
-@dp.callback_query(F.data == 'prev_month')
-@dp.callback_query(F.data == 'next_month')
+@dp.callback_query(F.data.endwith('month'))
 async def change_year(callback: CallbackQuery):
     old_month = year_dict['М_none']
 

@@ -42,10 +42,11 @@ weekday_section = [InlineKeyboardButton(text='пн', callback_data='none'),
                    InlineKeyboardButton(text='сб', callback_data='none'),
                    InlineKeyboardButton(text='вс', callback_data='none')]
 
-contro_keyboard = InlineKeyboardMarkup(inline_keyboard=[year_section, month_section, weekday_section], row_width=3, resize_keyboard=True)
+contro_keyboard = InlineKeyboardMarkup(inline_keyboard=[year_section, month_section, weekday_section], row_width=3,
+                                       resize_keyboard=True)
 
-async def new_keyboard() -> InlineKeyboardMarkup | ReplyKeyboardMarkup:
 
+def new_keyboard() -> InlineKeyboardMarkup | ReplyKeyboardMarkup:
     month_cal = calendar.monthcalendar(now_year, now_month)
     one_week_section = InlineKeyboardBuilder()
 
@@ -60,7 +61,8 @@ async def new_keyboard() -> InlineKeyboardMarkup | ReplyKeyboardMarkup:
 
     return one_week_section.adjust(7).as_markup()
 
-days_keyboard = asyncio.run(new_keyboard())
+
+days_keyboard = new_keyboard()
 
 combo_keyboard = contro_keyboard.inline_keyboard + days_keyboard.inline_keyboard
 

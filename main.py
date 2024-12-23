@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from loader import bot, dp, logger
 
 from keyboards import start_keyboard
-from keyboards import combo_keyboard
+from keyboards import combo_keyboard, new_keyboard
 
 
 # await bot.send_chat_action(message.chat.id, 'Загрузка видео')
@@ -93,8 +93,15 @@ async def stop_bot() -> None:
 
 
 if __name__ == '__main__':
+    today = datetime.today()
+    curr_year = today.year
+    curr_month = today.month
+
+
     try:
+
         asyncio.run(main())
+        #asyncio.run(month_calend(curr_year, curr_month))
 
     except KeyboardInterrupt:
         asyncio.run(stop_bot())

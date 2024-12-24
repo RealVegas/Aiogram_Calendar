@@ -42,19 +42,31 @@ async def ignore_callback(callback_query: CallbackQuery):
 # Кнопки для переключения лет
 @dp.callback_query(F.data.startswith('year-'))
 async def ignore_callback(callback_query: CallbackQuery):
+    curr_year: int = int(callback_query.data.split('_')[1])
+    curr_month: int = int(callback_query.data.split('_')[2])
+
     if callback_query.data.startswith('year-prev'):
-        await callback_query.answer('Кнопка год предыдущий')
+        curr_year -= 1
     elif callback_query.data.startswith('year-next'):
-        await callback_query.answer('Кнопка год следующий')
+        curr_year += 1
+
+    await callback_query.answer()
+    await callback_query.message.edit_text('Милый календарь v 1.0:', reply_markup=await generate_calendar(curr_year, curr_month))
 
 
 # Кнопки для переключения месяцев
 @dp.callback_query(F.data.startswith('month-'))
 async def ignore_callback(callback_query: CallbackQuery):
+    curr_month: int = int(callback_query.data.split('_')[1])
+    curr_year: int = int(callback_query.data.split('_')[2])
+
     if callback_query.data.startswith('month-prev'):
-        await callback_query.answer('Кнопка месяц предыдущий')
+        curr_month -= 1
     elif callback_query.data.startswith('month-next'):
-        await callback_query.answer('Кнопка месяц следующий')
+        curr_month += 1
+
+    await callback_query.answer()
+    await callback_query.message.edit_text('Милый календарь v 1.0:', reply_markup=await generate_calendar(curr_year, curr_month))
 
 
 # Запуск бота

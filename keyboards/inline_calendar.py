@@ -63,83 +63,46 @@ def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[
 
 
 # Формирование клавиатуры по параметрам
-async def generate_calendar(get_year, get_month, option=None):
+def generate_calendar(get_year: int, get_month: int, option=None) -> InlineKeyboardMarkup:
+
+    # Настройки нотации и языка для формирования клавиатур
     match option:
         case 'rus_full':
-            day_set = lang.ru_day_name
-            month_set = lang.ru_month_name
+            day_set: list[str] = lang.ru_day_name
+            month_set: list[str] = lang.ru_month_name
         case 'rus_short':
-            day_set = lang.ru_day_abbr
-            month_set = lang.ru_month_abbr
+            day_set: list[str] = lang.ru_day_abbr
+            month_set: list[str] = lang.ru_month_abbr
         case 'eng_full':
-            day_set = lang.eng_day_name
-            month_set = lang.eng_month_name
+            day_set: list[str] = lang.eng_day_name
+            month_set: list[str] = lang.eng_month_name
         case 'eng_short':
-            day_set = lang.eng_day_abbr
-            month_set = lang.eng_month_abbr
-#
-#
-# # Кнопки для выбора года
-# year_section = [InlineKeyboardButton(text='<', callback_data='prev_year'),
-#                 InlineKeyboardButton(text=f'{now_year}', callback_data='ignore'),
-#                 InlineKeyboardButton(text='>', callback_data='next_year')]
-#
-# # Кнопки для выбора месяца
-# month_section = [InlineKeyboardButton(text='<', callback_data='prev_month'),
-#                  InlineKeyboardButton(text=f'{now_month}', callback_data='ignore'),
-#                  InlineKeyboardButton(text='>', callback_data='prev_month')]
-#
-# # Дни недели
-# weekday_section = [InlineKeyboardButton(text='пн', callback_data='ignore'),
-#                    InlineKeyboardButton(text='вт', callback_data='ignore'),
-#                    InlineKeyboardButton(text='ср', callback_data='ignore'),
-#                    InlineKeyboardButton(text='чт', callback_data='ignore'),
-#                    InlineKeyboardButton(text='пт', callback_data='ignore'),
-#                    InlineKeyboardButton(text='сб', callback_data='ignore'),
-#                    InlineKeyboardButton(text='вс', callback_data='ignore')]
-#
-# contro_keyboard = InlineKeyboardMarkup(inline_keyboard=[year_section, month_section, weekday_section], row_width=3,
-#                                        resize_keyboard=True)
-#
-#
-# def new_keyboard() -> InlineKeyboardMarkup | ReplyKeyboardMarkup:
-#     month_cal = calendar.monthcalendar(now_year, now_month)
-#     one_week_section = InlineKeyboardBuilder()
-#
-#     for curr_week in month_cal:
-#
-#         for day_number in curr_week:
-#             if day_number == 0:
-#                 one_week_section.add(InlineKeyboardButton(text=' ', callback_data='none'))
-#
-#             else:
-#                 one_week_section.add(InlineKeyboardButton(text=f'{day_number} ', callback_data=f'day_{day_number}'))
-#
-#     return one_week_section.adjust(7).as_markup()
-#
-#
-# days_keyboard = new_keyboard()
-#
-# combo_keyboard = contro_keyboard.inline_keyboard + days_keyboard.inline_keyboard
-#
-# rows = int(len(combo_keyboard))
-#
-# combo_keyboard = InlineKeyboardMarkup(inline_keyboard=combo_keyboard, row_width=rows, resize_keyboard=True)
+            day_set: list[str] = lang.eng_day_abbr
+            month_set: list[str] = lang.eng_month_abbr
 
-# Формирование клавиатуры для выбора года и месяца
-# async def combo_keyboard(some_dict: dict[str, str]) -> InlineKeyboardMarkup | ReplyKeyboardMarkup:
-#     keyboard = InlineKeyboardBuilder()
-#     for key, value in some_dict.items():
-#         keyboard.add(InlineKeyboardButton(text=value, callback_data=key))
-#     return keyboard.adjust(3).as_markup()
+    # Формирование клавиатур
+    header: list[list[InlineKeyboardButton]] = header_keyboard(get_year, get_month, month_list=month_set)
+    month: list[list[InlineKeyboardButton]] = month_keyboard(get_year, get_month, day_list=day_set)
+
+    rows: int = int(len(month)) + 2
+    assembled_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(inline_keyboard=header + month, row_width=rows, resize_keyboard=True)
+
+    return assembled_keyboard
 
 
+# Тесты функций
 class TestCalendar(unittest.TestCase):
     def test_month_keyboard(self):
         month_keyboard(2023, 4, lang.ru_day_abbr)
 
     def test_header_keyboard(self):
         header_keyboard(2023, 4, lang.ru_month_abbr)
+
+    def test_generate_calendar(self):
+        generate_calendar(2023, 4, 'rus_short')
+        generate_calendar(2024, 10, 'rus_full')
+        generate_calendar(2024, 12, 'eng_short')
+        generate_calendar(2023, 8, 'eng_full')
 
 
 if __name__ == '__main__':

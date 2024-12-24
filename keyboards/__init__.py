@@ -1,1 +1,2 @@
 from .inline_calendar import start_keyboard
+from .inline_calendar import generate_calendar

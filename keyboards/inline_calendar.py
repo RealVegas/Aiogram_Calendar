@@ -1,30 +1,24 @@
 import calendar
 from datetime import datetime
 
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import lang
-
+from . import lang
 import unittest
 
 # Кнопка старт
 start_keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='/start')]], resize_keyboard=True)
 
+
 # Формирование календаря
-
-# Текущий шод и месяц
-today = datetime.now()
-
-now_year = today.year
-now_month = today.month
-
 
 # Кнопки для выбора года и месяца
 def header_keyboard(h_year: int, h_month: int, month_list: list[str]) -> list[list[InlineKeyboardButton]]:
 
+    month_desc: str = month_list[h_month - 1]
     header_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
     # Кнопки для лет
@@ -33,7 +27,7 @@ def header_keyboard(h_year: int, h_month: int, month_list: list[str]) -> list[li
                        InlineKeyboardButton(text='>', callback_data=f'year-next_{h_year}'))
     # Кнопки для месяцев
     header_section.add(InlineKeyboardButton(text='<', callback_data=f'month-prev_{h_month}'),
-                       InlineKeyboardButton(text=f'{h_month}', callback_data='ignore'),
+                       InlineKeyboardButton(text=f'{month_desc}', callback_data='ignore'),
                        InlineKeyboardButton(text='>', callback_data=f'month-next_{h_month}'))
 
     header_section: list[list[InlineKeyboardButton]] = header_section.adjust(3).as_markup().inline_keyboard
@@ -44,6 +38,13 @@ def header_keyboard(h_year: int, h_month: int, month_list: list[str]) -> list[li
 # Cетка для чисел месяца c названием дней
 def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[InlineKeyboardButton]]:
 
+    today = datetime.now()
+    now_year = today.year
+    now_month = today.month
+    now_day = today.day
+
+    print(now_day)
+
     month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(m_year, m_month)
     weeks_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
@@ -51,11 +52,16 @@ def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[
 
         for one_day in one_week:
             if one_day == 0:
-                weeks_section.add(InlineKeyboardButton(text=' ', callback_data='ignore'))
+                attr = {'text': ' ', 'data': 'ignore'}
             elif isinstance(one_day, str):
-                weeks_section.add(InlineKeyboardButton(text=f'{one_day} ', callback_data='ignore'))
+                attr = {'text': f'{one_day}', 'data': 'ignore'}
             else:
-                weeks_section.add(InlineKeyboardButton(text=f'{one_day} ', callback_data=f'day_{one_day}'))
+                if now_year == m_year and now_month == m_month and now_day == one_day:
+                    attr = {'text': f'[ {one_day} ]', 'data': f'day_{one_day}'}
+                else:
+                    attr = {'text': f'{one_day}', 'data': f'day_{one_day}'}
+
+            weeks_section.add(InlineKeyboardButton(text=attr['text'], callback_data=attr['data']))
 
     weeks_section: list[list[InlineKeyboardButton]] = weeks_section.adjust(7).as_markup().inline_keyboard
 
@@ -63,7 +69,11 @@ def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[
 
 
 # Формирование клавиатуры по параметрам
-def generate_calendar(get_year: int, get_month: int, option=None) -> InlineKeyboardMarkup:
+async def generate_calendar(get_year: int, get_month: int, option=None) -> InlineKeyboardMarkup:
+
+    # Настройки нотации и языка (если что-то пойдёт не так)
+    day_set: list[str] = lang.ru_day_abbr
+    month_set: list[str] = lang.ru_month_name
 
     # Настройки нотации и языка для формирования клавиатур
     match option:
@@ -72,13 +82,13 @@ def generate_calendar(get_year: int, get_month: int, option=None) -> InlineKeybo
             month_set: list[str] = lang.ru_month_name
         case 'rus_short':
             day_set: list[str] = lang.ru_day_abbr
-            month_set: list[str] = lang.ru_month_abbr
+            month_set: list[str] = lang.ru_month_name
         case 'eng_full':
             day_set: list[str] = lang.eng_day_name
             month_set: list[str] = lang.eng_month_name
         case 'eng_short':
             day_set: list[str] = lang.eng_day_abbr
-            month_set: list[str] = lang.eng_month_abbr
+            month_set: list[str] = lang.eng_month_name
 
     # Формирование клавиатур
     header: list[list[InlineKeyboardButton]] = header_keyboard(get_year, get_month, month_list=month_set)

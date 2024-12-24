@@ -43,8 +43,6 @@ def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[
     now_month = today.month
     now_day = today.day
 
-    print(now_day)
-
     month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(m_year, m_month)
     weeks_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 

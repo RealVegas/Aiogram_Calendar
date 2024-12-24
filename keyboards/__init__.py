@@ -1,3 +1,1 @@
-from .cal_keys import start_keyboard
-from .cal_keys import combo_keyboard
-from .cal_keys import new_keyboard
+from .inline_calendar import start_keyboard

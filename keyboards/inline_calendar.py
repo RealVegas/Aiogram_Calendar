@@ -46,18 +46,20 @@ def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[
     month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(m_year, m_month)
     weeks_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
+    this_day = now_day if now_year == m_year and now_month == m_month else -1
+
     for one_week in month_calendar:
 
         for one_day in one_week:
-            if one_day == 0:
-                attr = {'text': ' ', 'data': 'ignore'}
-            elif isinstance(one_day, str):
-                attr = {'text': f'{one_day}', 'data': 'ignore'}
+
+            if isinstance(one_day, str):
+                attr: dict[str, str] = {'text': f'{one_day}', 'data': 'ignore'}
+            elif one_day == 0:
+                attr: dict[str, str] = {'text': ' ', 'data': 'ignore'}
+            elif one_day == this_day:
+                attr: dict[str, str] = {'text': f'[ {one_day} ]', 'data': f'day_{one_day}'}
             else:
-                if now_year == m_year and now_month == m_month and now_day == one_day:
-                    attr = {'text': f'[ {one_day} ]', 'data': f'day_{one_day}'}
-                else:
-                    attr = {'text': f'{one_day}', 'data': f'day_{one_day}'}
+                attr: dict[str, str] = {'text': f'{one_day}', 'data': f'day_{one_day}'}
 
             weeks_section.add(InlineKeyboardButton(text=attr['text'], callback_data=attr['data']))
 
@@ -92,6 +94,7 @@ async def generate_calendar(get_year: int, get_month: int, option=None) -> Inlin
     header: list[list[InlineKeyboardButton]] = header_keyboard(get_year, get_month, month_list=month_set)
     month: list[list[InlineKeyboardButton]] = month_keyboard(get_year, get_month, day_list=day_set)
 
+    # Сборка клавиатуры
     rows: int = int(len(month)) + 2
     assembled_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(inline_keyboard=header + month, row_width=rows, resize_keyboard=True)
 
@@ -104,9 +107,9 @@ class TestCalendar(unittest.TestCase):
         month_keyboard(2023, 4, lang.ru_day_abbr)
 
     def test_header_keyboard(self):
-        header_keyboard(2023, 4, lang.ru_month_abbr)
+        header_keyboard(2023, 4, lang.ru_month_name)
 
-    def test_generate_calendar(self):
+    def test_generate_calendar(self):  # когда функция была синхронной
         generate_calendar(2023, 4, 'rus_short')
         generate_calendar(2024, 10, 'rus_full')
         generate_calendar(2024, 12, 'eng_short')

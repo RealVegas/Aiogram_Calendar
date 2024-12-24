@@ -26,9 +26,9 @@ def header_keyboard(h_year: int, h_month: int, month_list: list[str]) -> list[li
                        InlineKeyboardButton(text=f'{h_year}', callback_data='ignore'),
                        InlineKeyboardButton(text='>', callback_data=f'year-next_{h_year}_{h_month}'))
     # Кнопки для месяцев
-    header_section.add(InlineKeyboardButton(text='<', callback_data=f'month-prev_{h_month}_{h_year}'),
+    header_section.add(InlineKeyboardButton(text='<', callback_data=f'month-prev_{h_year}_{h_month}'),
                        InlineKeyboardButton(text=f'{month_desc}', callback_data='ignore'),
-                       InlineKeyboardButton(text='>', callback_data=f'month-next_{h_month}_{h_year}'))
+                       InlineKeyboardButton(text='>', callback_data=f'month-next_{h_year}_{h_month}'))
 
     header_section: list[list[InlineKeyboardButton]] = header_section.adjust(3).as_markup().inline_keyboard
 

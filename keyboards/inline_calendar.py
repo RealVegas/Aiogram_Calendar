@@ -22,31 +22,37 @@ now_year = today.year
 now_month = today.month
 
 
-def month_keyboard(get_year: int, get_month: int) -> list[list[InlineKeyboardButton]]:
+# Cетка для чисел месяца c названием дней
+def month_keyboard(get_year: int, get_month: int, day_list: list[str]) -> list[list[InlineKeyboardButton]]:
 
-    month_calendar = calendar.monthcalendar(get_year, get_month)
-    weeks_section = InlineKeyboardBuilder()
+    month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(get_year, get_month)
+    weeks_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
     for one_week in month_calendar:
 
         for one_day in one_week:
             if one_day == 0:
                 weeks_section.add(InlineKeyboardButton(text=' ', callback_data='ignore'))
+            elif isinstance(one_day, str):
+                weeks_section.add(InlineKeyboardButton(text=f'{one_day} ', callback_data='ignore'))
             else:
                 weeks_section.add(InlineKeyboardButton(text=f'{one_day} ', callback_data=f'day_{one_day}'))
 
-    weeks_section = weeks_section.adjust(7).as_markup().inline_keyboard
+    weeks_section: list[list[InlineKeyboardButton]] = weeks_section.adjust(7).as_markup().inline_keyboard
 
     return weeks_section
 
 
+def year_keyboard(get_year: int, get_month: int) -> list[list[InlineKeyboardButton]]:
+    year_section = InlineKeyboardBuilder()
 
+    year_section.add(InlineKeyboardButton(text='<', callback_data=f'year_dec_{get_year}_{get_month}'),
+                     InlineKeyboardButton(text=f'{get_year}', callback_data='ignore'),
+                     InlineKeyboardButton(text='>', callback_data=f'year_inc_{get_year}_{get_month}'))
 
+    year_section = year_section.adjust(3).as_markup().inline_keyboard
 
-
-
-
-
+    return year_section
 
 
 # async def generate_calendar(year, month, option=None):
@@ -122,10 +128,11 @@ def month_keyboard(get_year: int, get_month: int) -> list[list[InlineKeyboardBut
 
 class TestCalendar(unittest.TestCase):
     def test_month_keyboard(self):
-        month_keyboard(2023, 4)
+        month_keyboard(2023, 4, lang.ru_day_abbr)
 
         # month_keyboard(2023, 2)
         # month_keyboard(2023, 3)
+
 
 if __name__ == '__main__':
     unittest.main()

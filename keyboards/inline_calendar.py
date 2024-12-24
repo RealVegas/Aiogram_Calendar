@@ -22,10 +22,29 @@ now_year = today.year
 now_month = today.month
 
 
-# Cетка для чисел месяца c названием дней
-def month_keyboard(get_year: int, get_month: int, day_list: list[str]) -> list[list[InlineKeyboardButton]]:
+# Кнопки для выбора года и месяца
+def header_keyboard(h_year: int, h_month: int, month_list: list[str]) -> list[list[InlineKeyboardButton]]:
 
-    month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(get_year, get_month)
+    header_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    # Кнопки для лет
+    header_section.add(InlineKeyboardButton(text='<', callback_data=f'year-prev_{h_year}'),
+                       InlineKeyboardButton(text=f'{h_year}', callback_data='ignore'),
+                       InlineKeyboardButton(text='>', callback_data=f'year-next_{h_year}'))
+    # Кнопки для месяцев
+    header_section.add(InlineKeyboardButton(text='<', callback_data=f'month-prev_{h_month}'),
+                       InlineKeyboardButton(text=f'{h_month}', callback_data='ignore'),
+                       InlineKeyboardButton(text='>', callback_data=f'month-next_{h_month}'))
+
+    header_section: list[list[InlineKeyboardButton]] = header_section.adjust(3).as_markup().inline_keyboard
+
+    return header_section
+
+
+# Cетка для чисел месяца c названием дней
+def month_keyboard(m_year: int, m_month: int, day_list: list[str]) -> list[list[InlineKeyboardButton]]:
+
+    month_calendar: list[list[str | int]] = [day_list] + calendar.monthcalendar(m_year, m_month)
     weeks_section: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
     for one_week in month_calendar:
@@ -43,32 +62,21 @@ def month_keyboard(get_year: int, get_month: int, day_list: list[str]) -> list[l
     return weeks_section
 
 
-def year_keyboard(get_year: int, get_month: int) -> list[list[InlineKeyboardButton]]:
-    year_section = InlineKeyboardBuilder()
-
-    year_section.add(InlineKeyboardButton(text='<', callback_data=f'year_dec_{get_year}_{get_month}'),
-                     InlineKeyboardButton(text=f'{get_year}', callback_data='ignore'),
-                     InlineKeyboardButton(text='>', callback_data=f'year_inc_{get_year}_{get_month}'))
-
-    year_section = year_section.adjust(3).as_markup().inline_keyboard
-
-    return year_section
-
-
-# async def generate_calendar(year, month, option=None):
-#     match option:
-#         case 'rus_full':
-#             day_set = lang.ru_day_name
-#             month_set = lang.ru_month_name
-#         case 'rus_short':
-#             day_set = lang.ru_day_abbr
-#             month_set = lang.ru_month_abbr
-#         case 'eng_full':
-#             day_set = lang.eng_day_name
-#             month_set = lang.eng_month_name
-#         case 'eng_short':
-#             day_set = lang.eng_day_abbr
-#             month_set = lang.eng_month_abbr
+# Формирование клавиатуры по параметрам
+async def generate_calendar(get_year, get_month, option=None):
+    match option:
+        case 'rus_full':
+            day_set = lang.ru_day_name
+            month_set = lang.ru_month_name
+        case 'rus_short':
+            day_set = lang.ru_day_abbr
+            month_set = lang.ru_month_abbr
+        case 'eng_full':
+            day_set = lang.eng_day_name
+            month_set = lang.eng_month_name
+        case 'eng_short':
+            day_set = lang.eng_day_abbr
+            month_set = lang.eng_month_abbr
 #
 #
 # # Кнопки для выбора года
@@ -130,8 +138,8 @@ class TestCalendar(unittest.TestCase):
     def test_month_keyboard(self):
         month_keyboard(2023, 4, lang.ru_day_abbr)
 
-        # month_keyboard(2023, 2)
-        # month_keyboard(2023, 3)
+    def test_header_keyboard(self):
+        header_keyboard(2023, 4, lang.ru_month_abbr)
 
 
 if __name__ == '__main__':

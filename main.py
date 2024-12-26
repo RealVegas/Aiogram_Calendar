@@ -41,7 +41,7 @@ async def ignore_callback(callback_query: CallbackQuery):
 
 # Кнопки для переключения лет
 @dp.callback_query(F.data.startswith('year-'))
-async def ignore_callback(callback_query: CallbackQuery):
+async def year_callback(callback_query: CallbackQuery):
 
     await callback_query.answer()
 
@@ -61,7 +61,7 @@ async def ignore_callback(callback_query: CallbackQuery):
 
 # Кнопки для переключения месяцев
 @dp.callback_query(F.data.startswith('month-'))
-async def ignore_callback(callback_query: CallbackQuery):
+async def month_callback(callback_query: CallbackQuery):
 
     await callback_query.answer()
 
@@ -82,6 +82,12 @@ async def ignore_callback(callback_query: CallbackQuery):
 
     if new_month != curr_month:
         await callback_query.message.edit_text('Лёгкий календарь v 1.0:', reply_markup=await generate_calendar(curr_year, new_month))
+
+@dp.callback_query(F.data.startswith('day'))
+async def day_callback(callback_query: CallbackQuery):
+
+    curr_day: int = int(callback_query.data.split('_')[1])
+    await callback_query.answer(f'Вы выбрали: {curr_day} число')
 
 
 # Запуск бота

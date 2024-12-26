@@ -45,9 +45,6 @@ async def ignore_callback(callback_query: CallbackQuery):
 
     await callback_query.answer()
 
-    first_year: int = int(datetime.now().year)
-    last_year: int = first_year + 5
-
     curr_year: int = int(callback_query.data.split('_')[1])
     curr_month: int = int(callback_query.data.split('_')[2])
 
@@ -57,11 +54,6 @@ async def ignore_callback(callback_query: CallbackQuery):
         new_year -= 1
     elif callback_query.data.startswith('year-next'):
         new_year += 1
-
-    if new_year > last_year:
-        new_year = last_year
-    elif new_year < first_year:
-        new_year = first_year
 
     if new_year != curr_year:
         await callback_query.message.edit_text('Милый календарь v 1.0:', reply_markup=await generate_calendar(new_year, curr_month))
@@ -84,12 +76,12 @@ async def ignore_callback(callback_query: CallbackQuery):
         new_month += 1
 
     if new_month > 12:
-        new_month = 1
-    elif new_month < 1:
         new_month = 12
+    elif new_month < 1:
+        new_month = 1
 
     if new_month != curr_month:
-        await callback_query.message.edit_text('Милый календарь v 1.0:', reply_markup=await generate_calendar(curr_year, new_month))
+        await callback_query.message.edit_text('Лёгкий календарь v 1.0:', reply_markup=await generate_calendar(curr_year, new_month))
 
 
 # Запуск бота

@@ -86,7 +86,7 @@ async def start(message: Message):
     now_year = today.year
     now_month = today.month
 
-    options = load_init()
+    options = load_config()
 
     await message.answer('Выберите дату:', reply_markup=start_keyboard)
     await message.answer('Милый календарь v 1.0:', reply_markup=await generate_calendar(now_year, now_month, options=options))

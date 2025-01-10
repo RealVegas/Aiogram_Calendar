@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+Новый текстовый документ.txt
+
 # C extensions
 *.so
 
@@ -156,5 +158,5 @@ cython_debug/
 # PyCharm
 .idea/
 
-# Не очень полезщная тнформация по кнокам
+# Не очень полезщная информация по кнокам
 extra_info/

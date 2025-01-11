@@ -1,115 +1,94 @@
 import os
-# import sys
-
-# from typing import Optional, Iterator, IO
-# from dotenv.main import StrPath, DotEnv
+import sys
+from typing import Optional
 
 
-# Возвращает путь к родительской папке
 def parent_dir(path: str) -> str:
+    """
+    Return parent directory of the given directory
+
+    """
     return os.path.abspath(os.path.join(path, os.pardir))
 
 
-# Проверяет наличие lite_config.ini в текущей папке
 def find_config() -> str | None:
-    path = os.getcwd()
-    path_content = os.listdir(path)
+    """
+    Look for config_name('lite_config.ini') in path tree
+    Returns path with config_name if found, or None otherwise
 
-    while 'lite_config.ini' not in path_content:
-        path = parent_dir(path)
-        path_content = os.listdir(path)
+    """
+    config_name = 'lite_config.ini'
 
-    return os.path.join(path, 'lite_config.ini')
+    curr_path = os.getcwd()
+    curr_content = os.listdir(curr_path)
 
-    # if 'lite_config.ini' not in path_content:
-    #     parent_path = os.path.abspath(os.path.pardir)
-    #     parent_content = os.listdir(parent_path)
-    #
-    #     if 'lite_config.ini' in parent_content:
-    #         config_path = os.path.join(parent_path, 'lite_config.ini')
-    #         if os.path.isfile(config_path):
-    #            print(config_path)
+    last_path = curr_path
 
+    while config_name not in curr_content:
+        curr_path = parent_dir(last_path)
+        curr_content = os.listdir(curr_path)
 
-find_config()
+        if curr_path == last_path:
+            return None
+        else:
+            last_path = curr_path
 
-# root_path = os.getcwd()
-# par_dir = os.path.abspath(os.path.pardir)
-
-# from dotenv import load_dotenv, find_dotenv
-
-# if find_dotenv():
-#     load_dotenv(find_dotenv())
-# else:
-#     exit('Переменные окружения не загружены: файл .env отсутствует')
-#
-# BOT_TOKEN: str = os.getenv('BOT_TOKEN')
-# API_KEY: str = os.getenv('API_KEY')
+    return os.path.join(curr_path, config_name)
 
 
-# def walk_to_root(path: str) -> Iterator[str]:
-#     """
-#     Yield directories starting from the given directory up to the root
-#     """
-#     if not os.path.exists(path):
-#         raise IOError('Starting path not found')
-#
-#     if os.path.isfile(path):
-#         path = os.path.dirname(path)
-#
-#     last_dir = None
-#     current_dir = os.path.abspath(path)
-#     while last_dir != current_dir:
-#         yield current_dir
-#         parent_dir = os.path.abspath(os.path.join(current_dir, os.path.pardir))
-#         last_dir, current_dir = current_dir, parent_dir
-#
-# def find_config(
-#         filename: str = 'liteconfig.ini',
-#         raise_error_if_not_found: bool = False,
-#         usecwd: bool = False,
-# ) -> str:
-#     """
-#     Search in increasingly higher folders for the given file
-#
-#     Returns path to the file if found, or an empty string otherwise
-#     """
-#
-#     def _is_interactive():
-#         """ Decide whether this is running in a REPL or IPython notebook """
-#         try:
-#             main = __import__('__main__', None, None, fromlist=['__file__'])
-#         except ModuleNotFoundError:
-#             return False
-#         return not hasattr(main, '__file__')
-#
-#     if usecwd or _is_interactive() or getattr(sys, 'frozen', False):
-#         # Should work without __file__, e.g. in REPL or IPython notebook.
-#         path = os.getcwd()
-#     else:
-#         # will work for .py files
-#         frame = sys._getframe()
-#         current_file = __file__
-#
-#         while frame.f_code.co_filename == current_file or not os.path.exists(
-#                 frame.f_code.co_filename
-#         ):
-#             assert frame.f_back is not None
-#             frame = frame.f_back
-#         frame_filename = frame.f_code.co_filename
-#         path = os.path.dirname(os.path.abspath(frame_filename))
-#
-#     for dirname in _walk_to_root(path):
-#         check_path = os.path.join(dirname, filename)
-#         if os.path.isfile(check_path):
-#             return check_path
-#
-#     if raise_error_if_not_found:
-#         raise IOError('File not found')
-#
-#     return ''
-#
-#
+def load_config(config_path: Optional[str] = None) -> list[str]:
+    """
+    Load config file('lite_config.ini')
+    Returns prepared config file content
+
+    """
+    if config_path is None:
+        config_path = find_config()
+
+    if config_path is None:
+        sys.exit('Error: Config file not found')
+
+    else:
+        with open(config_path, 'r', encoding='utf-8') as config_file:
+            file_content = config_file.read().split('\n')
+            config_content = [one_line for one_line in file_content if '[' not in one_line]
+
+        return config_content
+
+
+cs = load_config()
+print(cs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # for line in
+        # config_file:
+        #     config = line.strip().split('=')
+        #     try:
+        #         new_dict[config[0].strip()] = config[1].strip()
+        #     except IndexError:
+        #         pass
+
+
+
+
+
+
+
 # def load_config(
 #         dotenv_path: Optional[StrPath] = None,
 #         stream: Optional[IO[str]] = None,
@@ -167,3 +146,35 @@ find_config()
 #             stream=stream,
 #             encoding=encoding,
 #     ).dict()
+
+
+
+
+# if find_config():
+#     load_config()
+# else:
+#      sys.exit('Настройки не загружены: файл lite_config.ini отсутствует')
+
+# BOT_TOKEN: str = os.getenv('BOT_TOKEN')
+# API_KEY: str = os.getenv('API_KEY')
+
+
+
+
+
+
+
+
+
+
+
+
+# from dotenv import load_dotenv, find_dotenv
+
+# if find_dotenv():
+#     load_dotenv(find_dotenv())
+# else:
+#     exit('Переменные окружения не загружены: файл .env отсутствует')
+#
+# BOT_TOKEN: str = os.getenv('BOT_TOKEN')
+# API_KEY: str = os.getenv('API_KEY')

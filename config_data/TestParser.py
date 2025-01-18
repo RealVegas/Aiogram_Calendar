@@ -1,101 +1,102 @@
+import sys
 import re
+from datetime import datetime
 
 
-def parse_date_format(date_format: str) -> dict:
+def parse_date_format(date_format: str) -> tuple[bool, str, str | None]:
     """
     Функция для разбора строки формата даты.
 
     Параметры:
-    - date_format (str): строка, представляющая формат даты, например "DD.MM.YYYY".
+    * date_format (str): строка, представляющая формат даты
 
     Возвращает:
-    - result (dict): Словарь с ключами:
-        * order - порядок следования компонентов (например, {'DD': 1, 'MM': 2, 'YYYY': 3}).
-        * separator - разделитель (например, "." или "-"). None, если разделителя нет.
-        * valid - True, если формат валиден, False, если нет.
-        * corrected_format - формат, исправленный в случае некорректных элементов (например, удалены лишние части).
+    * p_format - строка для использования в datetime.strptime.
+
     """
-    # Регулярное выражение для поиска компонентов даты
-    components_pattern = re.compile(r'(DD|MM|YYYY)')
+    date_blocks: list[str] = re.findall(r'(DD|MM|YYYY)', date_format)
 
-    # Найдем все компоненты формата (например, DD, MM, YYYY)
-    components = components_pattern.findall(date_format)
+    if not date_blocks:
+        return False, date_format, None
 
-    # Если формат пустой или содержит не поддерживаемые элементы - он некорректен
-    # if not components or len(components) != len(set(components)):
-    #     valid = False
+    # Подсчет дубликатов
+    blocks_count: list[int] = [date_blocks.count('DD'), date_blocks.count('MM'), date_blocks.count('YYYY')]
 
-    day_count = components.count('DD')
-    month_count = components.count('MM')
-    year_count = components.count('YYYY')
-
-    if day_count > 1 or month_count > 1 or year_count > 1:
-        rev = components[::-1]
+    # Удаление дубликатов (если они есть)
+    if any(num > 1 for num in blocks_count):
+        rev_blocks: list[str] = date_blocks[::-1]
 
         for item in ['DD', 'MM', 'YYYY']:
-            while rev.count(item) > 1:
-                rev.remove(item)
+            while rev_blocks.count(item) > 1:
+                rev_blocks.remove(item)
 
-        components = rev[::-1]
+        date_blocks: list[str] = rev_blocks[::-1]
 
-    # Определяем разделитель, если он есть
-    # Для этого используем регулярное выражение, которое находит любой символ, не являющийся частью компонентов даты или буквой
+    # Поиск разделителя
+    restricted: list[str] = ['M', 'D', 'Y']
+    separator: str = ''
 
-    sym_list = ['M', 'D', 'Y']
-    separator = None
-
-    for symbol in date_format:
-        if symbol not in sym_list:
-            separator = symbol
+    for char in date_format:
+        if char not in restricted:
+            separator: str = char
             break
 
     # Создаем "исправленный" формат, удаляя лишние части
     if separator:
-        corrected_format = separator.join(components)
+        cor_format: str = separator.join(date_blocks)
     else:
-        corrected_format = ''.join(components)
+        cor_format: str = ''.join(date_blocks)
 
-    valid = False if date_format != corrected_format else True
+    # Проверка валидности date_format
+    valid: bool = True if date_format == cor_format else False
 
-    pattern = r"(DD|MM|YYYY)"  # Паттерн ищет DD или MM
-
-    # Созадем шаблон для strptime
-    def replacer(match):
-        # Словарь для замены
-        replacements = {
-            'DD': '%d',
-            'MM': '%m',
-            'YYYY': '%Y'
-        }
-        return replacements[match.group()]  # Возвращаем заменённое значение
-
-    # Используем re.sub
-    date_pattern = re.sub(pattern, replacer, corrected_format)
+    # Создание строки для использования в datetime.strptime
+    p_format: str = cor_format.replace('DD', '%d').replace('MM', '%m').replace('YYYY', '%Y')
 
     # Возвращаем результаты
-    return {
-        'strptime_pattern': date_pattern,  # Строка для использования в strptime
-        'separator': separator,  # Разделитель (если есть)
-        'valid': valid,  # Флаг валидности формата
-        'corrected_format': corrected_format  # Исправленный формат
-    }
+    return valid, cor_format, p_format
+
+
+def check_start(start_date) -> tuple[bool, bool] | None:
+    start_decision: bool = False
+    conform_check: bool = False
+
+    start_body: list[str] = re.findall(r'\b(now)\b', start_date)
+    start_ending: str = re.sub(r'(now)', '', start_date)
+
+    print(start_body)
+    out_date = start_date
+
+    if start_body == ['now'] and start_ending == '':
+        start_decision: bool = True
+
+        if start_body == ['now']:
+            out_date = 'now'
+            start_decision: bool = True
+
+    else:
+        try:
+            datetime.strptime(start_date, '%d-%m-%Y')
+            conform_check: bool = True
+            start_decision: bool = True
+
+        except ValueError:
+            start_decision: bool = False
+            out_date = datetime.now().strftime('%d-%m-%Y')
+
+    # if not start_decision:
+    #     sys.exit('Начальная дата не указана, либо указана неверно')
+
+    return out_date, conform_check, True
 
 
 # Примеры использования функции
 examples = [
-    "DD.MM.YYYY",
-    "YYYY-DD-MM",
-    "MM/YYYY/DD",
-    "DDYYYYMM",
-    "YYYY.TT.MM.DD.MM",
-    "YY.MM.DD",
-    "DD-MM-YYYY",
-    "YYYY/DD/MM/",
-    "MMDDYY.YMDDYYYYMMMMDDYYYMMYY"
+    'now+2',
+    '24-10-2025'
 ]
-
 for example in examples:
-    result = parse_date_format(example)
+    result = check_start(example)
     print(f"Input format: {example}")
     print(f"Result: {result}")
     print("-" * 40)

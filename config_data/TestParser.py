@@ -1,4 +1,4 @@
-import sys
+# import sys
 import re
 from datetime import datetime
 
@@ -57,7 +57,7 @@ def parse_date_format(date_format: str) -> tuple[bool, str, str | None]:
     return valid, cor_format, p_format
 
 
-def check_start(start_date) -> tuple[bool, bool] | None:
+def check_start(start_date) -> tuple[str, bool, bool] | None:
     start_decision: bool = False
     conform_check: bool = False
 
@@ -67,12 +67,12 @@ def check_start(start_date) -> tuple[bool, bool] | None:
     print(start_body)
     out_date = start_date
 
-    if start_body == ['now'] and start_ending == '':
-        start_decision: bool = True
-
-        if start_body == ['now']:
-            out_date = 'now'
+    if start_body == ['now']:
+        if start_ending == '':
             start_decision: bool = True
+        else:
+            out_date = 'now'
+            start_decision: bool = False
 
     else:
         try:
@@ -87,13 +87,13 @@ def check_start(start_date) -> tuple[bool, bool] | None:
     # if not start_decision:
     #     sys.exit('Начальная дата не указана, либо указана неверно')
 
-    return out_date, conform_check, True
+    return out_date, conform_check, start_decision
 
 
 # Примеры использования функции
 examples = [
     'now+2',
-    '24-10-2025'
+    '24.10.2025'
 ]
 for example in examples:
     result = check_start(example)

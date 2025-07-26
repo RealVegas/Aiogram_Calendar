@@ -96,7 +96,7 @@ async def generate_calendar(get_year: int, get_month: int, option=None) -> Inlin
 
     # Сборка клавиатуры
     rows: int = int(len(month)) + 2
-    assembled_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(inline_keyboard=header + month, row_width=rows, resize_keyboard=True)
+    assembled_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(inline_keyboard=header + month)
 
     return assembled_keyboard
 

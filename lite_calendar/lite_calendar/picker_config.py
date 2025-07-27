@@ -112,8 +112,6 @@ class CheckBounds:
         self.__end_date = end_date
         self.__date_format = date_format
 
-        self.__temp_start: datetime | None = None
-        self.__temp_end: datetime | None = None
         self.__today: datetime = datetime.now()
 
     @property
@@ -136,6 +134,7 @@ class CheckBounds:
 
         return False
 
+    @property
     def convert_format(self) -> str | None:
         """
         Convert date output pattern for strptime
@@ -153,73 +152,74 @@ class CheckBounds:
         sys.exit(1)
 
     @property
-    def __check_start(self) -> dict[str, datetime | bool] | None:
+    def __check_start(self) -> datetime | None:
         """
-        Checks the start date is correct and a conform check necessity.
+        Checks the start date is correct.
 
         """
         if self.__start_date == 'now':
-            return {'check_start': self.__today, 'check_conform': False}
+            return self.__today
 
         try:
-            self.__temp_start = datetime.strptime(self.__start_date, '%d-%m-%Y')
-            return {'check_start': self.__temp_start, 'check_conform': True}
+            temp_date: datetime = datetime.strptime(self.__start_date, '%d-%m-%Y')
+            return temp_date
 
         except ValueError:
             logger.error('Error: The start date is not specified, or specified incorrectly.')
             sys.exit(1)
 
     @property
-    def __check_end(self) -> dict[str, datetime | bool] | None:
+    def __check_end(self) -> datetime | None:
         """
-        Checks the end date is correct and a conform check necessity.
+        Checks the end date is correct.
 
         """
         if re.fullmatch(r'now\+(\d+[YMD])', self.__end_date):
-            return {'check_end': True, 'check_conform': False}
+            return self.__today
+
+        if re.fullmatch(r'start_date\+(\d+[YMD])', self.__end_date):
+            return None
 
         try:
-            self.__temp_end = datetime.strptime(self.__end_date, '%d-%m-%Y')
-            return {'check_end': self.__temp_end, 'check_conform': True}
+            temp_date = datetime.strptime(self.__end_date, '%d-%m-%Y')
+            return temp_date
 
         except ValueError:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    def check_conform(self) -> bool | None:
+    @property
+    def check_conform(self) -> tuple[datetime, datetime] | None:
         """
         Checks the start and end date are conform.
 
         """
-        start_conform = self.__check_start['check_conform']
-        end_conform = self.__check_end['check_conform']
+        temp_start = self.__check_start
+        temp_end = self.__check_end
 
-        if not start_conform and not end_conform:
-            return True
+        if self.__end_date.startswith('now'):
+            return self.__convert_now(temp_start, temp_end)
 
-        if 'now+' in self.__end_date:
-            check_result = self.check_now()
-
-            if not check_result:
-                logger.error('Error: The start date is greater than or equal the end date.')
-                sys.exit(1)
-
-            return True
+        elif self.__end_date.startswith('start_date'):
+            return self.__convert_now(temp_start, temp_start)
 
         else:
-            if self.__temp_end >= self.__temp_start:
-                return True
+            if temp_end > temp_start:
+                return temp_start, temp_end
 
-            logger.error('Error: The start date is greater than or equal the end date.')
+            logger.error('Error: The start date is greater or equal the end date.')
             sys.exit(1)
 
-    def check_now(self) -> bool:
+    def __convert_now(self, start_dt: datetime, end_dt: datetime) -> tuple[datetime, datetime]:
         """
-        Checks for conformity if self.__end_date = 'now+...'
+        Convert self.__end_date = 'now+...' to concrete date
 
         """
         try:
-            time_shift: int = int(self.__end_date[4:-1])
+            if self.__end_date.endswith('now'):
+                time_shift: int = int(self.__end_date[4:-1])
+            else:
+                time_shift: int = int(self.__end_date[11:-1])
 
         except ValueError:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
@@ -236,12 +236,9 @@ class CheckBounds:
                 logger.error('Error: The the time delta is not specified, or specified incorrectly.')
                 sys.exit(1)
 
-        finish_date: datetime = self.__today + relativedelta(**span)
+        end_dt = end_dt + relativedelta(**span)
 
-        if finish_date >= self.__temp_start:
-            return True
-
-        return False
+        return start_dt, end_dt
 
 
 # Основное
@@ -260,11 +257,16 @@ CONFIRM_BUTTON: str = config.get('confirm_button')
 
 # Date Bounds
 START_DATE: str = config.get('start_date')
-END_DATE: str = config.get('end_date')
-DATE_FORMAT: str = config.get('date_format')
+END_DATE: str | datetime = config.get('end_date')
+DATE_FORMAT: str | datetime = config.get('date_format')
 
 exterior = CheckExterior(EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON)
 bounds = CheckBounds(START_DATE, END_DATE, DATE_FORMAT)
 
-print(exterior.check)
-print(bounds.convert_format())
+ext_check: bool = exterior.check
+DATE_FORMAT = bounds.convert_format
+START_DATE, END_DATE = bounds.check_conform
+
+print(f'New date format: {DATE_FORMAT}')
+print(f'New start date: {START_DATE}')
+print(f'New end date: {END_DATE}')

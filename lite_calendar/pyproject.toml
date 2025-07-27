@@ -1,0 +1,41 @@
+[project]
+name = "lite_calendar"
+version = "1.0"
+description = "Выбор даты в inline-календаре для Telegram-ботов на aiogram 3"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Вадим Голов", url = "https://github.com/VadimGolov", email = "ve-golov@yandex.ru"}
+]
+keywords = [
+    "telegram", "inline",
+    "aiogram", "aiogram3",
+    "calendar", "date", "datepicker", "date-picker", "date_picker",
+    "telegram-calendar", "telegram-datepicker", "telegram-date-picker"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: MIT License",
+    "Framework :: AsyncIO",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Communications :: Chat"
+]
+
+dependencies = [
+    "aiogram>=3.21.0",
+    "loguru>=0.7.3"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1"
+]
+
+[build-system]
+requires = ["setuptools>=80.9.0"]
+build-backend = "setuptools.build_meta"

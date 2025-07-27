@@ -1,16 +1,18 @@
+import pytest
 import calendar
 from datetime import datetime
-
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from pathlib import Path
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from . import lang
 import unittest
 
 # Кнопка старт
-start_keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='/start')]], resize_keyboard=True)
+# start_keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='/start')]], resize_keyboard=True)
 
 
 # Формирование календаря

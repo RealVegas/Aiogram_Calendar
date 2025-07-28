@@ -1,5 +1,6 @@
 import re
 import sys
+import json
 
 from loguru import logger
 from pathlib import Path
@@ -54,15 +55,12 @@ def load_config(content: list[str] = None) -> dict[str, str]:
     config_data: dict[str, str] = {}
 
     for item in content:
-        temp: list[str] = item.split('=')
 
         try:
-            config_key: str = temp[0].strip()
-            config_value: str = temp[1].strip()
-
+            config_key, config_value = map(str.strip, item.split('=', 1))
             config_data[config_key] = config_value
 
-        except IndexError:
+        except (IndexError, ValueError):
             continue
 
     if config_data:
@@ -73,11 +71,6 @@ def load_config(content: list[str] = None) -> dict[str, str]:
 
 
 class CheckExterior:
-    """
-    Get values of parameters from exterior section
-    Returns True if all values are correct or exit otherwise
-
-    """
 
     def __init__(self, ext_mode: str, day_format: str, month_format: str, confirm_button: str) -> None:
         self.__values: dict[str, str] = {'mode': ext_mode, 'day': day_format, 'month': month_format,
@@ -91,6 +84,11 @@ class CheckExterior:
 
     @property
     def check(self) -> bool | None:
+        """
+        Get values of parameters from exterior section
+        Returns True if all values are correct or exit otherwise
+
+        """
         index: int = 0
 
         for name, value in self.__values.items():
@@ -105,14 +103,10 @@ class CheckExterior:
         return True
 
 
-class CheckBounds:
+class CheckFormat:
 
-    def __init__(self, start_date: str, end_date: str, date_format: str) -> None:
-        self.__start_date = start_date
-        self.__end_date = end_date
+    def __init__(self, date_format: str) -> None:
         self.__date_format = date_format
-
-        self.__today: datetime = datetime.now()
 
     @property
     def __check_format(self) -> bool | None:
@@ -150,6 +144,15 @@ class CheckBounds:
 
         logger.error('Error: The date output pattern is not specified, or specified incorrectly.')
         sys.exit(1)
+
+
+class CheckBounds:
+
+    def __init__(self, start_date: str, end_date: str) -> None:
+        self.__start_date = start_date
+        self.__end_date = end_date
+
+        self.__today: datetime = datetime.now()
 
     @property
     def __check_start(self) -> datetime | None:
@@ -216,7 +219,7 @@ class CheckBounds:
 
         """
         try:
-            if self.__end_date.endswith('now'):
+            if self.__end_date.startswith('now'):
                 time_shift: int = int(self.__end_date[4:-1])
             else:
                 time_shift: int = int(self.__end_date[11:-1])
@@ -241,32 +244,114 @@ class CheckBounds:
         return start_dt, end_dt
 
 
-# Основное
-if find_config():
-    con_data: list[str] = read_config()
-    config: dict[str, str] = load_config(con_data)
+class LangData:
 
-else:
-    sys.exit('Параметры календаря не загружены: файл lite_config.ini отсутствует')
+    def __init__(self, day_str: str, month_atr: str) -> None:
+        self.__day = day_str
+        self.__month = month_atr
 
-# Exterior
-EXT_MODE: str = config.get('ext_mode')
-DAY_FORMAT: str = config.get('day_format')
-MONTH_FORMAT: str = config.get('month_format')
-CONFIRM_BUTTON: str = config.get('confirm_button')
+    @property
+    def __read_lang(self) -> dict[str, dict[str, int | str]]:
+        """
+        Read language file
 
-# Date Bounds
-START_DATE: str = config.get('start_date')
-END_DATE: str | datetime = config.get('end_date')
-DATE_FORMAT: str | datetime = config.get('date_format')
+        """
+        lang_path: Path = Path(__file__).parent / 'misc' / 'lang.json'
 
-exterior = CheckExterior(EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON)
-bounds = CheckBounds(START_DATE, END_DATE, DATE_FORMAT)
+        with open(lang_path, 'r', encoding='utf-8') as lang_file:
+            return json.load(lang_file)
 
-ext_check: bool = exterior.check
-DATE_FORMAT = bounds.convert_format
-START_DATE, END_DATE = bounds.check_conform
+    @classmethod
+    def __get_lang(cls, lang_str: str) -> str:
+        """
+        Get language
 
-print(f'New date format: {DATE_FORMAT}')
-print(f'New start date: {START_DATE}')
-print(f'New end date: {END_DATE}')
+        """
+        if lang_str == 'number':
+            return 'num'
+        elif lang_str.startswith('ru'):
+            return 'ru'
+        elif lang_str.startswith('en'):
+            return 'en'
+        else:
+            logger.error('Error: The language is not specified, or specified incorrectly.')
+            sys.exit(1)
+
+    @classmethod
+    def __get_grid(cls, grid_str: str, date: str) -> str:
+        """
+        Get grid
+
+        """
+        if grid_str == 'number':
+            return '{span}_num'
+        elif grid_str.endswith('full'):
+            return f'{date}_name'
+        elif grid_str.endswith('short'):
+            return f'{date}_abbr'
+        else:
+            logger.error('Error: The grid is not specified, or specified incorrectly.')
+            sys.exit(1)
+
+    def date_set(self, option: str) -> list[int | str]:
+        """
+        Get list of day or month in specified format
+
+        """
+        __date_param: str | None = None
+
+        if option == 'day':
+            __date_param: str = self.__day
+        elif option == 'month':
+            __date_param: str = self.__month
+
+        lang_data = self.__read_lang
+
+        lang: str = self.__get_lang(__date_param)
+        grid: str = self.__get_grid(__date_param, option)
+
+        return lang_data[lang][grid]  # noqa type ignore
+
+
+if __name__ == '__main__':
+    if find_config():
+        config_list: list[str] = read_config()
+        config_dict: dict[str, str] = load_config(config_list)
+
+    else:
+        logger.error('Error: Config file (lite_config.ini) not found')
+        sys.exit(1)
+
+    # Exterior section
+    EXT_MODE: str = config_dict.get('ext_mode')
+    DAY_FORMAT: str = config_dict.get('day_format')
+    MONTH_FORMAT: str = config_dict.get('month_format')
+    CONFIRM_BUTTON: str = config_dict.get('confirm_button')
+
+    # Date Bounds section
+    START_DATE: str = config_dict.get('start_date')
+    END_DATE: str | datetime = config_dict.get('end_date')
+    DATE_FORMAT: str | datetime = config_dict.get('date_format')
+
+    exterior = CheckExterior(EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON)
+    formator = CheckFormat(DATE_FORMAT)
+    bounds = CheckBounds(START_DATE, END_DATE)
+    lang_sets = LangData(DAY_FORMAT, MONTH_FORMAT)
+
+    if exterior.check:
+        DATE_FORMAT: str = formator.convert_format
+        START_DATE, END_DATE = bounds.check_conform
+        DAY_SET: list[int | str] = lang_sets.date_set('day')
+        MONTH_SET: list[int | str] = lang_sets.date_set('month')
+
+        print(f'Ext_mode: {EXT_MODE}')
+        print(f'Day_format: {DAY_FORMAT}')
+        print(f'Month_format: {MONTH_FORMAT}')
+        print(f'Confirm_button: {CONFIRM_BUTTON}')
+
+        print(f'\nNew date format: {DATE_FORMAT}')
+        print(f'New start date: {START_DATE}')
+        print(f'New end date: {END_DATE}')
+
+        print(f'\nCurrent day-set: {DAY_SET}')
+        print(f'Current month-set: {MONTH_SET}')

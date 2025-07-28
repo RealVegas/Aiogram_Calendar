@@ -2,6 +2,8 @@ import re
 import sys
 import json
 
+from typing import cast
+
 from loguru import logger
 from pathlib import Path
 
@@ -375,7 +377,7 @@ class LangData:
         lang: str = self.__get_lang(__date_param)
         grid: str = self.__get_grid(__date_param, option)
 
-        return lang_data[lang][grid]  # noqa type ignore
+        return cast(list[int | str], lang_data[lang][grid])
 
 
 if __name__ == '__main__':

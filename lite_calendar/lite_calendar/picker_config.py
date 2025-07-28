@@ -59,7 +59,7 @@ def init_config() -> None:
 
     if exterior.check:
         DATE_FORMAT = formator.convert_format
-        START_DATE, END_DATE = bounds.check_conform
+        START_DATE, END_DATE = map(lambda some_date: datetime.strftime(some_date, '%d.%m.%Y'), bounds.check_conform)
         DAY_SET = lang_sets.date_set('day')
         MONTH_SET = lang_sets.date_set('month')
 
@@ -231,6 +231,7 @@ class CheckBounds:
 
         try:
             temp_date: datetime = datetime.strptime(self.__start_date, '%d-%m-%Y')
+            print(temp_date)
             return temp_date
 
         except ValueError:

@@ -11,6 +11,71 @@ from dateutil.relativedelta import relativedelta
 # Инициализация логирования
 logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 MB', compression='zip')
 
+# Глобальные переменные (инициализируются позже)
+EXT_MODE: str
+DAY_FORMAT: str
+MONTH_FORMAT: str
+CONFIRM_BUTTON: str
+
+START_DATE: str | datetime
+END_DATE: str | datetime
+DATE_FORMAT: str
+
+DAY_SET: list[int | str]
+MONTH_SET: list[int | str]
+
+__all__ = ('init_config',
+           'EXT_MODE', 'DAY_FORMAT', 'MONTH_FORMAT', 'CONFIRM_BUTTON',
+           'START_DATE', 'END_DATE', 'DATE_FORMAT', 'DAY_SET', 'MONTH_SET'
+           )
+
+
+def init_config() -> None:
+    """
+    Initialize config
+
+    """
+    global EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON
+    global START_DATE, END_DATE, DATE_FORMAT
+    global DAY_SET, MONTH_SET
+
+    config_list: list[str] = read_config()
+    config_dict: dict[str, str] = load_config(config_list)
+
+    EXT_MODE = config_dict.get('ext_mode')
+    DAY_FORMAT = config_dict.get('day_format')
+    MONTH_FORMAT = config_dict.get('month_format')
+    CONFIRM_BUTTON = config_dict.get('confirm_button')
+
+    START_DATE = config_dict.get('start_date')
+    END_DATE = config_dict.get('end_date')
+    DATE_FORMAT = config_dict.get('date_format')
+
+    exterior = CheckExterior(EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON)
+    formator = CheckFormat(DATE_FORMAT)
+    bounds = CheckBounds(START_DATE, END_DATE)
+    lang_sets = LangData(DAY_FORMAT, MONTH_FORMAT)
+
+    if exterior.check:
+        DATE_FORMAT = formator.convert_format
+        START_DATE, END_DATE = bounds.check_conform
+        DAY_SET = lang_sets.date_set('day')
+        MONTH_SET = lang_sets.date_set('month')
+
+        logger.info(f'Ext_mode: {EXT_MODE}')
+        logger.info(f'Day_format: {DAY_FORMAT}')
+        logger.info(f'Month_format: {MONTH_FORMAT}')
+        logger.info(f'Confirm_button: {CONFIRM_BUTTON}')
+
+        logger.info(f'New date format: {DATE_FORMAT}')
+        logger.info(f'New start date: {START_DATE}')
+        logger.info(f'New end date: {END_DATE}')
+
+        logger.info(f'Current day-set: {DAY_SET}')
+        logger.info(f'Current month-set: {MONTH_SET}')
+
+    logger.info('Config successfully initialized')
+
 
 def find_config() -> Path | None:
     """
@@ -314,44 +379,4 @@ class LangData:
 
 
 if __name__ == '__main__':
-    if find_config():
-        config_list: list[str] = read_config()
-        config_dict: dict[str, str] = load_config(config_list)
-
-    else:
-        logger.error('Error: Config file (lite_config.ini) not found')
-        sys.exit(1)
-
-    # Exterior section
-    EXT_MODE: str = config_dict.get('ext_mode')
-    DAY_FORMAT: str = config_dict.get('day_format')
-    MONTH_FORMAT: str = config_dict.get('month_format')
-    CONFIRM_BUTTON: str = config_dict.get('confirm_button')
-
-    # Date Bounds section
-    START_DATE: str = config_dict.get('start_date')
-    END_DATE: str | datetime = config_dict.get('end_date')
-    DATE_FORMAT: str | datetime = config_dict.get('date_format')
-
-    exterior = CheckExterior(EXT_MODE, DAY_FORMAT, MONTH_FORMAT, CONFIRM_BUTTON)
-    formator = CheckFormat(DATE_FORMAT)
-    bounds = CheckBounds(START_DATE, END_DATE)
-    lang_sets = LangData(DAY_FORMAT, MONTH_FORMAT)
-
-    if exterior.check:
-        DATE_FORMAT: str = formator.convert_format
-        START_DATE, END_DATE = bounds.check_conform
-        DAY_SET: list[int | str] = lang_sets.date_set('day')
-        MONTH_SET: list[int | str] = lang_sets.date_set('month')
-
-        print(f'Ext_mode: {EXT_MODE}')
-        print(f'Day_format: {DAY_FORMAT}')
-        print(f'Month_format: {MONTH_FORMAT}')
-        print(f'Confirm_button: {CONFIRM_BUTTON}')
-
-        print(f'\nNew date format: {DATE_FORMAT}')
-        print(f'New start date: {START_DATE}')
-        print(f'New end date: {END_DATE}')
-
-        print(f'\nCurrent day-set: {DAY_SET}')
-        print(f'Current month-set: {MONTH_SET}')
+    pass

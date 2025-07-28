@@ -13,22 +13,22 @@ from dateutil.relativedelta import relativedelta
 # Инициализация логирования
 logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 MB', compression='zip')
 
-# Глобальные переменные (инициализируются позже)
-EXT_MODE: str
-CONFIRM_BUTTON: str
+# Глобальные переменные
+EXT_MODE: str = 'empty'
+CONFIRM_BUTTON: str = 'empty'
 
-START_DATE: str | datetime
-END_DATE: str | datetime
-DATE_FORMAT: str
+START_DATE: str | datetime = 'empty'
+END_DATE: str | datetime = 'empty'
+DATE_FORMAT: str = 'empty'
 
-DAY_SET: list[int | str]
-MONTH_SET: list[int | str]
+DAY_SET: list[int | str] = []
+MONTH_SET: list[int | str] = []
 
-__all__ = ('init_config',
+__all__ = ['init_config',
            'EXT_MODE', 'CONFIRM_BUTTON',
            'START_DATE', 'END_DATE', 'DATE_FORMAT',
            'DAY_SET', 'MONTH_SET'
-           )
+           ]
 
 
 def init_config() -> None:

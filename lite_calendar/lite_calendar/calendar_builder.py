@@ -1,6 +1,6 @@
 import calendar
 from datetime import datetime
-from typing import Any
+from dateutil.relativedelta import relativedelta
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -18,15 +18,15 @@ class AioBaseCalendar:
 
         self.builder = InlineKeyboardBuilder()
 
-        self.active_day: int = current.day
-        self.active_month: int = current.month
-        self.active_year: int = current.year
+        self.now_day: int = current.day
+        self.now_month: int = current.month
+        self.now_year: int = current.year
 
         self.current_year: int
         self.current_month: int
 
         self.ext_mode: str = EXT_MODE
-        self.confirm_button: bool = CONFIRM_BUTTON.lower() == 'true'
+        self.confirm_button: bool = CONFIRM_BUTTON
         self.start_date: str = START_DATE
         self.end_date: str = END_DATE
         self.date_format: str = DATE_FORMAT

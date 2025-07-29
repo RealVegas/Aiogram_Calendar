@@ -59,7 +59,8 @@ def init_config() -> None:
 
     if exterior.check:
         DATE_FORMAT = formator.convert_format
-        START_DATE, END_DATE = map(lambda some_date: datetime.strftime(some_date, '%d.%m.%Y'), bounds.check_conform)
+        # START_DATE, END_DATE = map(lambda some_date: datetime.strftime(some_date, '%d.%m.%Y'), bounds.check_conform)
+        START_DATE, END_DATE = bounds.check_conform
         DAY_SET = lang_sets.date_set('day')
         MONTH_SET = lang_sets.date_set('month')
 
@@ -138,14 +139,14 @@ def load_config(content: list[str] = None) -> dict[str, str]:
 
 class CheckExterior:
 
-    def __init__(self, ext_mode: str, day_format: str, month_format: str, confirm_button: str) -> None:
+    def __init__(self, ext_mode: str, day_format: str, month_format: str, confirm_button: bool) -> None:
         self.__values: dict[str, str] = {'mode': ext_mode, 'day': day_format, 'month': month_format,
                                          'button': confirm_button}
         self.__correct: list[set[str]] = [
             {'full', 'mini'},
             {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
             {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
-            {'True', 'False'}
+            {True, False}
         ]
 
     @property

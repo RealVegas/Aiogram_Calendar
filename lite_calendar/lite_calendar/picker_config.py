@@ -15,7 +15,7 @@ logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotati
 
 # Глобальные переменные
 EXT_MODE: str = 'empty'
-CONFIRM_BUTTON: str = 'empty'
+CONFIRM_BUTTON: bool = True
 
 START_DATE: str | datetime = 'empty'
 END_DATE: str | datetime = 'empty'
@@ -46,7 +46,7 @@ def init_config() -> None:
     EXT_MODE = config_dict.get('ext_mode')
     day_format: str = config_dict.get('day_format')
     month_format: str = config_dict.get('month_format')
-    CONFIRM_BUTTON = config_dict.get('confirm_button')
+    CONFIRM_BUTTON = config_dict.get('confirm_button') == 'True'
 
     START_DATE = config_dict.get('start_date')
     END_DATE = config_dict.get('end_date')

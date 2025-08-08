@@ -1,8 +1,9 @@
+import calendar
 from datetime import datetime
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from lite_calendar.lite_calendar.config.picker_config import *
+from ..config import *
 
 
 class AioBaseCalendar:
@@ -28,8 +29,11 @@ class AioBaseCalendar:
         self.now_month: int = now_date.month
         self.now_year: int = now_date.year
 
+        self.current_day: int = self.start_date.day
         self.current_year: int = self.start_date.year
         self.current_month: int = self.start_date.month
+
         self.selected_date: datetime | None = None
 
-        self.callback_prefix: str = 'litepick'
+        self.rebuild_grid: bool = True
+        # self.callback_prefix: str = 'litepick'

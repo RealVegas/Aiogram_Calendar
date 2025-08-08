@@ -86,7 +86,7 @@ def find_config() -> Path | None:
     """
 
     base_path: Path = Path(__file__).parent
-    config_file: Path = base_path / 'config' / 'lite_config.ini'
+    config_file: Path = base_path / 'lite_config.ini'
 
     if config_file.is_file():
         return config_file

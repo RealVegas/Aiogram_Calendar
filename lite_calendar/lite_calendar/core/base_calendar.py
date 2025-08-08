@@ -1,11 +1,8 @@
-import calendar
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
-from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from .picker_config import *
+from lite_calendar.lite_calendar.config.picker_config import *
 
 
 class AioBaseCalendar:

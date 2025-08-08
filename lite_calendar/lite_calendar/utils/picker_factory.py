@@ -1,9 +1,9 @@
 import sys
-from .picker_config import logger
+from lite_calendar.lite_calendar.config.picker_config import logger
 
-from .base_calendar import AioBaseCalendar
-from .full_picker import AioFullPicker
-from .mini_picker import AioMiniPicker
+from lite_calendar.lite_calendar.core.base_calendar import AioBaseCalendar
+from lite_calendar.lite_calendar.core.build_full import AioFullPicker
+from lite_calendar.lite_calendar.core.build_mini import AioMiniPicker
 
 
 def lite_calendar() -> AioBaseCalendar:

@@ -160,3 +160,6 @@ cython_debug/
 
 # Не очень полезщная информация по кнокам
 extra_info/
+
+# Дерево директорий
+directory-tree.txt

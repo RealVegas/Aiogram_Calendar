@@ -2,10 +2,6 @@ __author__ = 'Vadim Golov'
 __title__ = 'Lite Calendar'
 __version__ = '1.0.0'
 
-import picker_config
+from .utils.picker_factory import lite_calendar
 
-from .factory import lite_calendar
-from .base_calendar import AioBaseCalendar
-
-__all__ = ['lite_calendar', 'AioBaseCalendar']
-__all__.extend(getattr(picker_config, '__all__', []))
+__all__ = ['lite_calendar']

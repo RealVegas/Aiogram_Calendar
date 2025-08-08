@@ -6,7 +6,7 @@ from .full_picker import AioFullPicker
 from .mini_picker import AioMiniPicker
 
 
-def create_calendar() -> AioBaseCalendar:
+def lite_calendar() -> AioBaseCalendar:
     """
     Создаёт календарь в зависимости от режима.
 

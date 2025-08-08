@@ -24,7 +24,7 @@ DATE_FORMAT: str = 'empty'
 DAY_SET: list[int | str] = []
 MONTH_SET: list[int | str] = []
 
-__all__ = ['init_config',
+__all__ = ['logger', 'init_config',
            'EXT_MODE', 'CONFIRM_BUTTON',
            'START_DATE', 'END_DATE', 'DATE_FORMAT',
            'DAY_SET', 'MONTH_SET'
@@ -46,7 +46,7 @@ def init_config() -> None:
     EXT_MODE = config_dict.get('ext_mode')
     day_format: str = config_dict.get('day_format')
     month_format: str = config_dict.get('month_format')
-    CONFIRM_BUTTON = config_dict.get('confirm_button') == 'True'
+    CONFIRM_BUTTON = config_dict.get('confirm_button').lower() == 'true'
 
     START_DATE = config_dict.get('start_date')
     END_DATE = config_dict.get('end_date')
@@ -59,7 +59,6 @@ def init_config() -> None:
 
     if exterior.check:
         DATE_FORMAT = formator.convert_format
-        # START_DATE, END_DATE = map(lambda some_date: datetime.strftime(some_date, '%d.%m.%Y'), bounds.check_conform)
         START_DATE, END_DATE = bounds.check_conform
         DAY_SET = lang_sets.date_set('day')
         MONTH_SET = lang_sets.date_set('month')

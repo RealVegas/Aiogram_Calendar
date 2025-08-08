@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from picker_config import *
+from .picker_config import *
 
 
 class AioBaseCalendar:
@@ -25,7 +25,7 @@ class AioBaseCalendar:
         self.day_set: list[str] = DAY_SET
         self.month_set: list[str] = MONTH_SET
 
-        self.builder = InlineKeyboardBuilder()
+        self.key_builder = InlineKeyboardBuilder()
 
         self.now_day: int = now_date.day
         self.now_month: int = now_date.month
@@ -36,11 +36,3 @@ class AioBaseCalendar:
         self.selected_date: datetime | None = None
 
         self.callback_prefix: str = 'litepick'
-
-
-class AioFullPicker(AioBaseCalendar):
-    pass
-
-
-class AioMiniPicker(AioBaseCalendar):
-    pass

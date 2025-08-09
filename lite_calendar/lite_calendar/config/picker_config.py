@@ -59,7 +59,7 @@ def init_config() -> None:
 
     if exterior.check:
         DATE_FORMAT = formator.convert_format
-        START_DATE, END_DATE = bounds.check_conform
+        START_DATE, END_DATE = bounds.check_conform()
         DAY_SET = lang_sets.date_set('day')
         MONTH_SET = lang_sets.date_set('month')
 
@@ -148,7 +148,6 @@ class CheckExterior:
             {True, False}
         ]
 
-    @property
     def check(self) -> bool | None:
         """
         Get values of parameters from exterior section
@@ -174,7 +173,6 @@ class CheckFormat:
     def __init__(self, date_format: str) -> None:
         self.__date_format = date_format
 
-    @property
     def __check_format(self) -> bool | None:
         """
         Check pattern for output date
@@ -194,7 +192,6 @@ class CheckFormat:
 
         return False
 
-    @property
     def convert_format(self) -> str | None:
         """
         Convert date output pattern for strptime
@@ -220,7 +217,6 @@ class CheckBounds:
 
         self.__today: datetime = datetime.now()
 
-    @property
     def __check_start(self) -> datetime | None:
         """
         Checks the start date is correct.
@@ -231,14 +227,12 @@ class CheckBounds:
 
         try:
             temp_date: datetime = datetime.strptime(self.__start_date, '%d-%m-%Y')
-            print(temp_date)
             return temp_date
 
         except ValueError:
             logger.error('Error: The start date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    @property
     def __check_end(self) -> datetime | None:
         """
         Checks the end date is correct.
@@ -258,14 +252,13 @@ class CheckBounds:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    @property
     def check_conform(self) -> tuple[datetime, datetime] | None:
         """
         Checks the start and end date are conform.
 
         """
-        temp_start = self.__check_start
-        temp_end = self.__check_end
+        temp_start = self.__check_start()
+        temp_end = self.__check_end()
 
         if self.__end_date.startswith('now'):
             return self.__convert_now(temp_start, temp_end)
@@ -317,8 +310,8 @@ class LangData:
         self.__day = day_str
         self.__month = month_atr
 
-    @property
-    def __read_lang(self) -> dict[str, dict[str, int | str]]:
+    @classmethod
+    def __read_lang(cls) -> dict[str, dict[str, int | str]]:
         """
         Read language file
 
@@ -372,7 +365,7 @@ class LangData:
         elif option == 'month':
             __date_param: str = self.__month
 
-        lang_data = self.__read_lang
+        lang_data = self.__read_lang()
 
         lang: str = self.__get_lang(__date_param)
         grid: str = self.__get_grid(__date_param, option)
@@ -381,4 +374,5 @@ class LangData:
 
 
 if __name__ == '__main__':
+    init_config()
     pass

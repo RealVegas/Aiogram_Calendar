@@ -57,7 +57,7 @@ def init_config() -> None:
     bounds = CheckBounds(START_DATE, END_DATE)
     lang_sets = LangData(day_format, month_format)
 
-    if exterior.check:
+    if exterior.check():
         DATE_FORMAT = formator.convert_format()
         START_DATE, END_DATE = bounds.check_conform()
         DAY_SET = lang_sets.date_set('day')
@@ -227,8 +227,7 @@ class CheckBounds:
             return self.__today
 
         try:
-            temp_date: datetime = datetime.strptime(self.__start_date, '%d-%m-%Y')
-            return temp_date
+            return datetime.strptime(self.__start_date, '%d-%m-%Y')
 
         except ValueError:
             logger.error('Error: The start date is not specified, or specified incorrectly.')
@@ -239,15 +238,11 @@ class CheckBounds:
         Checks the end date is correct.
 
         """
-        if re.fullmatch(r'now\+(\d+[YMD])', self.__end_date):
+        if re.fullmatch(r'(now|start_date)\+(\d+[YMD])', self.__end_date):
             return self.__today
 
-        if re.fullmatch(r'start_date\+(\d+[YMD])', self.__end_date):
-            return None
-
         try:
-            temp_date = datetime.strptime(self.__end_date, '%d-%m-%Y')
-            return temp_date
+            return datetime.strptime(self.__end_date, '%d-%m-%Y')
 
         except ValueError:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
@@ -262,43 +257,50 @@ class CheckBounds:
         temp_end = self.__check_end()
 
         if self.__end_date.startswith('now'):
-            return self.__convert_now(temp_start, temp_end)
+            return self.__convert_shift(temp_start, temp_end)
 
         elif self.__end_date.startswith('start_date'):
-            return self.__convert_now(temp_start, temp_start)
+            return self.__convert_shift(temp_start, temp_start)
 
-        else:
-            if temp_end > temp_start:
-                return temp_start, temp_end
+        elif temp_end > temp_start:
+            return temp_start, temp_end
 
-            logger.error('Error: The start date is greater or equal the end date.')
+        logger.error('Error: The start date is greater or equal the end date.')
+        sys.exit(1)
+
+    def __convert_shift(self, start_dt: datetime, end_dt: datetime) -> tuple[datetime, datetime]:
+        """
+        Convert self.__end_date = 'now+...' | 'start_date+...' to concrete date
+
+        """
+        pattern = r'(now|start_date)\+(\d+)([YMD])'
+        match = re.fullmatch(pattern, self.__end_date)
+
+        if not match:
+            logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    def __convert_now(self, start_dt: datetime, end_dt: datetime) -> tuple[datetime, datetime]:
-        """
-        Convert self.__end_date = 'now+...' to concrete date
+        shift_str = match.group(2)
+        date_unit = match.group(3)
 
-        """
         try:
-            if self.__end_date.startswith('now'):
-                time_shift: int = int(self.__end_date[4:-1])
-            else:
-                time_shift: int = int(self.__end_date[11:-1])
+            time_shift: int = int(shift_str)
 
         except ValueError:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-        match self.__end_date[-1:]:
-            case 'Y':
-                span = {'years': time_shift}
-            case 'M':
-                span = {'months': time_shift}
-            case 'D':
-                span = {'days': time_shift}
-            case _:
-                logger.error('Error: The the time delta is not specified, or specified incorrectly.')
-                sys.exit(1)
+        unit_map = {
+            'Y': {'years': time_shift},
+            'M': {'months': time_shift},
+            'D': {'days': time_shift}
+        }
+
+        span = unit_map.get(date_unit)
+
+        if span is None:
+            logger.error('Error: The the time delta is not specified, or specified incorrectly.')
+            sys.exit(1)
 
         end_dt = end_dt + relativedelta(**span)
 
@@ -379,4 +381,5 @@ class LangData:
 
 
 if __name__ == '__main__':
+    init_config()
     pass

@@ -2,7 +2,7 @@ import re
 import sys
 import json
 
-from typing import cast
+from typing import cast, Literal
 
 from loguru import logger
 from pathlib import Path
@@ -58,7 +58,7 @@ def init_config() -> None:
     lang_sets = LangData(day_format, month_format)
 
     if exterior.check:
-        DATE_FORMAT = formator.convert_format
+        DATE_FORMAT = formator.convert_format()
         START_DATE, END_DATE = bounds.check_conform()
         DAY_SET = lang_sets.date_set('day')
         MONTH_SET = lang_sets.date_set('month')
@@ -94,7 +94,7 @@ def find_config() -> Path | None:
     return None
 
 
-def read_config() -> list[str] | None:
+def read_config() -> list[str]:
     """
     Read config file('lite_config.ini')
     Returns prepared config file content
@@ -112,7 +112,7 @@ def read_config() -> list[str] | None:
     sys.exit(1)
 
 
-def load_config(content: list[str] = None) -> dict[str, str]:
+def load_config(content: list[str] | None = None) -> dict[str, str]:
     """
     Get config file content if exist
     Returns dictionary with config items
@@ -139,31 +139,32 @@ def load_config(content: list[str] = None) -> dict[str, str]:
 class CheckExterior:
 
     def __init__(self, ext_mode: str, day_format: str, month_format: str, confirm_button: bool) -> None:
-        self.__values: dict[str, str] = {'mode': ext_mode, 'day': day_format, 'month': month_format,
-                                         'button': confirm_button}
-        self.__correct: list[set[str]] = [
-            {'full', 'mini'},
-            {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
-            {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
-            {True, False}
-        ]
+        self.__values: dict[str, str] = {
+            'mode': ext_mode,
+            'day': day_format,
+            'month': month_format,
+            'button': confirm_button
+        }
 
-    def check(self) -> bool | None:
+        self.__correct: dict[str, set[str] | set[bool]] = {
+            'mode': {'full', 'mini'},
+            'day': {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
+            'month': {'number', 'ru_full', 'ru_short', 'en_full', 'en_short'},
+            'button': {True, False}
+        }
+
+    def check(self) -> bool:
         """
         Get values of parameters from exterior section
         Returns True if all values are correct or exit otherwise
 
         """
-        index: int = 0
-
         for name, value in self.__values.items():
-            if value not in self.__correct[index]:
+            if value not in self.__correct[name]:
                 if value == '':
-                    value: str = '?'
+                    value = '?'
                 logger.error(f'Error: Value {value} for key {name} is not acceptable')
                 sys.exit(1)
-            else:
-                index += 1
 
         return True
 
@@ -173,7 +174,7 @@ class CheckFormat:
     def __init__(self, date_format: str) -> None:
         self.__date_format = date_format
 
-    def __check_format(self) -> bool | None:
+    def __check_format(self) -> bool:
         """
         Check pattern for output date
 
@@ -192,12 +193,12 @@ class CheckFormat:
 
         return False
 
-    def convert_format(self) -> str | None:
+    def convert_format(self) -> str:
         """
         Convert date output pattern for strptime
 
         """
-        if self.__check_format:
+        if self.__check_format():
             mapping: dict[str, str] = {'DD': '%d', 'MM': '%m', 'YYYY': '%Y'}
             pattern: re.Pattern = re.compile(r'YYYY|DD|MM')
 
@@ -217,7 +218,7 @@ class CheckBounds:
 
         self.__today: datetime = datetime.now()
 
-    def __check_start(self) -> datetime | None:
+    def __check_start(self) -> datetime:
         """
         Checks the start date is correct.
 
@@ -252,7 +253,7 @@ class CheckBounds:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    def check_conform(self) -> tuple[datetime, datetime] | None:
+    def check_conform(self) -> tuple[datetime, datetime]:
         """
         Checks the start and end date are conform.
 
@@ -310,19 +311,23 @@ class LangData:
         self.__day = day_str
         self.__month = month_atr
 
-    @classmethod
-    def __read_lang(cls) -> dict[str, dict[str, int | str]]:
+    @staticmethod
+    def __read_lang() -> dict[str, dict[str, int | str]]:
         """
         Read language file
 
         """
         lang_path: Path = Path(__file__).parent / 'lang.json'
 
+        if not lang_path.is_file():
+            logger.error(f'Error: Language file {lang_path} not found.')
+            sys.exit(1)
+
         with open(lang_path, 'r', encoding='utf-8') as lang_file:
             return json.load(lang_file)
 
-    @classmethod
-    def __get_lang(cls, lang_str: str) -> str:
+    @staticmethod
+    def __get_lang(lang_str: str) -> str:
         """
         Get language
 
@@ -337,8 +342,8 @@ class LangData:
             logger.error('Error: The language is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    @classmethod
-    def __get_grid(cls, grid_str: str, date: str) -> str:
+    @staticmethod
+    def __get_grid(grid_str: str, date: str) -> str:
         """
         Get grid
 
@@ -353,7 +358,7 @@ class LangData:
             logger.error('Error: The grid is not specified, or specified incorrectly.')
             sys.exit(1)
 
-    def date_set(self, option: str) -> list[int | str]:
+    def date_set(self, option: Literal['day', 'month']) -> list[int | str]:
         """
         Get list of day or month in specified format
 

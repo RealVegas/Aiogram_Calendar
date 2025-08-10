@@ -200,7 +200,7 @@ class CheckFormat:
         """
         if self.__check_format():
             mapping: dict[str, str] = {'DD': '%d', 'MM': '%m', 'YYYY': '%Y'}
-            pattern: re.Pattern = re.compile(r'YYYY|DD|MM')
+            pattern: re.Pattern = re.compile(r'YYYY|MM|DD')
 
             converted: str = pattern.sub(lambda date_pattern: mapping[date_pattern.group(0)], self.__date_format)
 
@@ -298,7 +298,7 @@ class CheckBounds:
 
         span = unit_map.get(date_unit)
 
-        if span is None:
+        if span is None or time_shift == 0:
             logger.error('Error: The the time delta is not specified, or specified incorrectly.')
             sys.exit(1)
 

@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 import subprocess
@@ -10,19 +9,22 @@ def main():
         sys.exit(1)
 
     project_root = Path(__file__).parent.parent.resolve()
-    # sys.path.insert(0, str(project_root))  # Эту строку можно оставить, но subprocess свой sys.path не видит
 
     file_path = (project_root / sys.argv[1]).resolve()
-    print(f'project_root = {project_root}')
-    print(f'file_path = {file_path}')
+    print(f'project_root : {project_root}')
+    print(f'file_path : {file_path}\n')
 
     relative_path = file_path.relative_to(project_root)
 
     module_name = str(relative_path.with_suffix('')).replace('\\', '.').replace('/', '.')
-    print(f'▶ Запуск модуля: {module_name}')
+    print(f'▶ Запуск модуля: {file_path.name}')
 
-    python_executable = Path(sys.executable).parent / sys.executable
-    cmd = [python_executable, '-m', module_name]
+    # if module_name in sys.modules:
+    #     print(f'Удаляю модуль {module_name} из памяти')
+    #     del sys.modules[module_name]
+
+    python_exe = Path(sys.executable)
+    cmd = [python_exe, '-m', module_name]
 
     # Добавляем cwd=project_root, чтобы subprocess запускался из корня проекта
     result = subprocess.run(cmd, cwd=str(project_root))

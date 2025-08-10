@@ -36,4 +36,4 @@ class AioBaseCalendar:
         self.selected_date: datetime | None = None
 
         self.rebuild_grid: bool = True
-        # self.callback_prefix: str = 'litepick'
+        self.callback_prefix: str = 'litepick'

@@ -1,8 +1,8 @@
+from typing import cast, Literal
+
 import re
 import sys
 import json
-
-from typing import cast, Literal
 
 from loguru import logger
 from pathlib import Path
@@ -24,6 +24,7 @@ DATE_FORMAT: str = 'empty'
 DAY_SET: list[int | str] = []
 MONTH_SET: list[int | str] = []
 
+# Для импорта по *
 __all__ = ['logger', 'init_config',
            'EXT_MODE', 'CONFIRM_BUTTON',
            'START_DATE', 'END_DATE', 'DATE_FORMAT',
@@ -280,8 +281,8 @@ class CheckBounds:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-        shift_str = match.group(2)
-        date_unit = match.group(3)
+        shift_str: str = match.group(2)
+        date_unit: str = match.group(3)
 
         try:
             time_shift: int = int(shift_str)
@@ -290,24 +291,25 @@ class CheckBounds:
             logger.error('Error: The end date is not specified, or specified incorrectly.')
             sys.exit(1)
 
-        unit_map = {
+        unit_map: dict[str, dict[str, int]] = {
             'Y': {'years': time_shift},
             'M': {'months': time_shift},
             'D': {'days': time_shift}
         }
 
-        span = unit_map.get(date_unit)
+        span: dict[str, int] = unit_map.get(date_unit)
 
         if span is None or time_shift == 0:
             logger.error('Error: The the time delta is not specified, or specified incorrectly.')
             sys.exit(1)
 
-        end_dt = end_dt + relativedelta(**span)
+        end_dt: datetime = end_dt + relativedelta(**span)
 
         return start_dt, end_dt
 
 
 class LangData:
+
 
     def __init__(self, day_str: str, month_atr: str) -> None:
         self.__day = day_str

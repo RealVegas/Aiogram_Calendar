@@ -1,4 +1,3 @@
-import calendar
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -44,11 +43,11 @@ class AioBaseCalendar:
         self.rebuild_grid: bool = True
         self.close_picker: bool = False
 
-    def _nav_bounds(self, period: str, direction: str) -> datetime | bool:
+    def __nav_bounds(self, period: str, direction: str) -> datetime | bool:
         """
         Проверяет, можно ли сдвинуть календарь в заданном направлении и периоде.
 
-        :param period: 'day', 'month' или 'year'
+        :param period: 'month' или 'year'
         :param direction: 'next' или 'prev'
         :return: новая дата, если сдвиг возможен, иначе False
 
@@ -56,7 +55,6 @@ class AioBaseCalendar:
         date_offset = 1 if direction == 'next' else -1
 
         period_map: dict[str, dict[str, int]] = {
-            'day': {'days': date_offset},
             'month': {'months': date_offset},
             'year': {'years': date_offset}
         }
@@ -73,17 +71,17 @@ class AioBaseCalendar:
 
         return False
 
-    def navigate(self, period: str, direction: str) -> bool:
+    def _navigate(self, period: str, direction: str) -> bool:
         """
         Публичный метод: сдвигает отображаемый период календаря на 1 шаг.
 
-        :param period: 'day','month' или 'year'
+        :param period: 'month' или 'year'
         :param direction: 'next' или 'prev'
         :return: True, если навигация выполнена (self.rebuild_grid установлен в True),
                  False, если движение запрещено (nav_bounds вернул False).
         """
         # Проверяем что новая дата получена
-        nav_date = self._nav_bounds(period, direction)
+        nav_date = self.__nav_bounds(period, direction)
 
         if not nav_date:
             return False
@@ -91,21 +89,29 @@ class AioBaseCalendar:
         # Обновляем данные календаря
         self.current_year = nav_date.year
         self.current_month = nav_date.month
-        self.current_day = nav_date.day
 
         # Параметр, перестроения сетки
         self.rebuild_grid = True
 
         return True
 
-    def confirm_selection(self) -> None:
+    def _select_day(self, day: int) -> None:
         """
-        Подтверждает выбор даты, фиксируя selected_date.
+        Записывает выбранный день в current_day (self.rebuild_grid установлен в True)
+
+        """
+        self.current_day = day
+        self.rebuild_grid = True  # перестроить сетку
+
+    def _confirm_selection(self) -> None:
+        """
+        Подтверждает выбор даты, фиксируя selected_date (close_picker установлен в True)
+
         """
         self.selected_date = datetime(self.current_year, self.current_month, self.current_day)
         self.close_picker = True
 
-    def formatted_selection(self) -> str:
+    def _formatted_selection(self) -> str:
         """
         Возвращает выбранную дату в виде отформатированной строки.
 

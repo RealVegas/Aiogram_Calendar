@@ -95,13 +95,23 @@ class AioBaseCalendar:
 
         return True
 
-    def _select_day(self, day: int) -> None:
+    def _select_day(self, selected_day: int) -> bool:
         """
-        Записывает выбранный день в current_day (self.rebuild_grid установлен в True)
+        Записывает выбранный день в current_day c проверкой даты
+
+        :param selected_day - выбранный в календаре день
+        :return: True, если новая дата входит в допустимый диапазон (self.rebuild_grid установлен в True),
+                 False, если дата выпала из диапазона.
 
         """
-        self.current_day = day
-        self.rebuild_grid = True  # перестроить сетку
+        nav_date: datetime = datetime(self.current_year, self.current_month, self.current_day) + relativedelta(day=selected_day)
+
+        if self.start_date <= nav_date <= self.end_date:
+            self.current_day = selected_day
+            self.rebuild_grid = True  # перестроить сетку
+            return True
+
+        return False
 
     def _confirm_selection(self) -> None:
         """

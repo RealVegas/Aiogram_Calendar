@@ -113,6 +113,14 @@ class AioBaseCalendar:
 
         return False
 
+    # def _select_day(self, selected_day: int) -> None:
+    #     """
+    #     Записывает выбранный день в current_day без проверки даты
+    #
+    #     """
+    #     self.current_day = selected_day
+    #     self.rebuild_grid = True  # перестроить сетку
+
     def _confirm_selection(self) -> None:
         """
         Подтверждает выбор даты, фиксируя selected_date (close_picker установлен в True)

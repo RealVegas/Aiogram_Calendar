@@ -47,7 +47,7 @@ class AioBaseCalendar:
         """
         Проверяет, можно ли сдвинуть календарь в заданном направлении и периоде.
 
-        :param period: 'month' или 'year'
+        :param period: 'day', 'month' или 'year'
         :param direction: 'next' или 'prev'
         :return: новая дата, если сдвиг возможен, иначе False
 
@@ -55,6 +55,7 @@ class AioBaseCalendar:
         date_offset = 1 if direction == 'next' else -1
 
         period_map: dict[str, dict[str, int]] = {
+            'day': {'days': date_offset},
             'month': {'months': date_offset},
             'year': {'years': date_offset}
         }
@@ -75,7 +76,7 @@ class AioBaseCalendar:
         """
         Публичный метод: сдвигает отображаемый период календаря на 1 шаг.
 
-        :param period: 'month' или 'year'
+        :param period: 'day', 'month' или 'year'
         :param direction: 'next' или 'prev'
         :return: True, если навигация выполнена (self.rebuild_grid установлен в True),
                  False, если движение запрещено (nav_bounds вернул False).
@@ -87,39 +88,44 @@ class AioBaseCalendar:
             return False
 
         # Обновляем данные календаря
-        self.current_year = nav_date.year
-        self.current_month = nav_date.month
+        match period:
+            case 'day':
+                self.current_day = nav_date.day
+            case 'month':
+                self.current_month = nav_date.month
+            case 'year':
+                self.current_year = nav_date.year
 
         # Параметр, перестроения сетки
         self.rebuild_grid = True
 
         return True
 
-    def _select_day(self, selected_day: int) -> bool:
-        """
-        Записывает выбранный день в current_day c проверкой даты
-
-        :param selected_day - выбранный в календаре день
-        :return: True, если новая дата входит в допустимый диапазон (self.rebuild_grid установлен в True),
-                 False, если дата выпала из диапазона.
-
-        """
-        nav_date: datetime = datetime(self.current_year, self.current_month, self.current_day) + relativedelta(day=selected_day)
-
-        if self.start_date <= nav_date <= self.end_date:
-            self.current_day = selected_day
-            self.rebuild_grid = True  # перестроить сетку
-            return True
-
-        return False
-
-    # def _select_day(self, selected_day: int) -> None:
+    # def _select_day(self, selected_day: int) -> bool:
     #     """
-    #     Записывает выбранный день в current_day без проверки даты
+    #     Записывает выбранный день в current_day c проверкой даты
+    #
+    #     :param selected_day - выбранный в календаре день
+    #     :return: True, если новая дата входит в допустимый диапазон (self.rebuild_grid установлен в True),
+    #              False, если дата выпала из диапазона.
     #
     #     """
-    #     self.current_day = selected_day
-    #     self.rebuild_grid = True  # перестроить сетку
+    #     nav_date: datetime = datetime(self.current_year, self.current_month, self.current_day) + relativedelta(day=selected_day)
+    #
+    #     if self.start_date <= nav_date <= self.end_date:
+    #         self.current_day = selected_day
+    #         self.rebuild_grid = True  # перестроить сетку
+    #         return True
+    #
+    #     return False
+
+    def _select_day(self, selected_day: int) -> None:
+        """
+        Записывает выбранный день в current_day без проверки даты
+
+        """
+        self.current_day = selected_day
+        self.rebuild_grid = True  # перестроить сетку
 
     def _confirm_selection(self) -> None:
         """
@@ -129,6 +135,7 @@ class AioBaseCalendar:
         self.selected_date = datetime(self.current_year, self.current_month, self.current_day)
         self.close_picker = True
 
+    @property
     def _formatted_selection(self) -> str:
         """
         Возвращает выбранную дату в виде отформатированной строки.

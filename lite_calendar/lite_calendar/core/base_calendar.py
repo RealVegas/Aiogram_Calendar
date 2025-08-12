@@ -43,7 +43,7 @@ class AioBaseCalendar:
         self.rebuild_grid: bool = True
         self.close_picker: bool = False
 
-    def __nav_bounds(self, period: str, direction: str) -> datetime | bool:
+    def _nav_bounds(self, period: str, direction: str) -> datetime | bool:
         """
         Проверяет, можно ли сдвинуть календарь в заданном направлении и периоде.
 
@@ -81,7 +81,7 @@ class AioBaseCalendar:
                  False, если движение запрещено (nav_bounds вернул False).
         """
         # Проверяем что новая дата получена
-        nav_date = self.__nav_bounds(period, direction)
+        nav_date = self._nav_bounds(period, direction)
 
         if not nav_date:
             return False

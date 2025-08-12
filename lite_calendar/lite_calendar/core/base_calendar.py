@@ -45,7 +45,7 @@ class AioBaseCalendar:
 
     def _nav_bounds(self, period: str, direction: str) -> datetime | bool:
         """
-        Проверяет, можно ли сдвинуть календарь в заданном направлении и периоде.
+        Проверяет, выбранный период календаря на 1 шаг вперед или назад.
 
         :param period: 'day', 'month' или 'year'
         :param direction: 'next' или 'prev'
@@ -74,7 +74,7 @@ class AioBaseCalendar:
 
     def _navigate(self, period: str, direction: str) -> bool:
         """
-        Публичный метод: сдвигает отображаемый период календаря на 1 шаг.
+        Сдвигает выбранный период календаря на 1 шаг вперед или назад.
 
         :param period: 'day', 'month' или 'year'
         :param direction: 'next' или 'prev'
